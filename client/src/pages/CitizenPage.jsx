@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { submitFeedback } from "../api";
 
 export function CitizenPage({ user }) {
@@ -6,6 +6,13 @@ export function CitizenPage({ user }) {
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const successHeadingRef = useRef(null);
+
+  useEffect(() => {
+    if (submitted) {
+      successHeadingRef.current?.focus();
+    }
+  }, [submitted]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -37,8 +44,10 @@ export function CitizenPage({ user }) {
       </div>
       <section className="form-card">
         {submitted ? (
-          <div className="submission-success" role="status">
-            <div className="success-banner">Thank you. Your feedback has been received.</div>
+          <div className="submission-success">
+            <h2 className="success-banner" ref={successHeadingRef} tabIndex="-1" aria-live="polite">
+              Thank you. Your feedback has been received.
+            </h2>
             <p>You can send another piece of feedback whenever you are ready.</p>
             <button className="primary-button" type="button" onClick={handleSubmitAnother}>
               Submit another response
@@ -46,12 +55,15 @@ export function CitizenPage({ user }) {
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
-            <label>Your feedback
+            <label htmlFor="feedback-message">Your feedback
               <textarea
+                id="feedback-message"
                 rows="7"
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}
                 maxLength={maxMessageLength}
+                aria-describedby={error ? "feedback-error" : undefined}
+                aria-invalid={Boolean(error)}
                 placeholder="Share your feedback here..."
               />
             </label>
@@ -62,7 +74,7 @@ export function CitizenPage({ user }) {
               </div>
               <button className="primary-button">Submit feedback</button>
             </div>
-            {error && <p className="error-message">{error}</p>}
+            {error && <p className="error-message" id="feedback-error" role="alert">{error}</p>}
           </form>
         )}
       </section>
