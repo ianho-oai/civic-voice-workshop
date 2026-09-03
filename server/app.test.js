@@ -28,6 +28,24 @@ describe("CivicVoice baseline API", () => {
     expect(response.body.user.role).toBe("citizen");
   });
 
+  it("rate-limits repeated failed sign-ins without blocking a successful sign-in", async () => {
+    const app = await testApp();
+    const invalidCredentials = { nric: "S0000001A", password: "not-the-password", role: "citizen" };
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const response = await request(app).post("/api/login").send(invalidCredentials);
+      expect(response.status).toBe(401);
+    }
+    const limited = await request(app).post("/api/login").send(invalidCredentials);
+    expect(limited.status).toBe(429);
+    expect(limited.headers["retry-after"]).toBeDefined();
+
+    const freshApp = await testApp();
+    const successful = await request(freshApp).post("/api/login").send({
+      nric: "S0000001A", password: "citizen123", role: "citizen",
+    });
+    expect(successful.status).toBe(200);
+  });
+
   it("stores hashed demo passwords while keeping the workshop credentials usable", async () => {
     const directory = await mkdtemp(path.join(os.tmpdir(), "civic-voice-"));
     const db = await createDb(path.join(directory, "db.json"));

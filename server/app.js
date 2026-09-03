@@ -13,6 +13,9 @@ function passwordMatches(password, passwordHash) {
 export async function createApp(options = {}) {
   const db = options.db ?? (await createDb());
   const sessions = new Map();
+  const failedLogins = new Map();
+  const maxFailedLogins = options.maxFailedLogins ?? 5;
+  const loginWindowMs = options.loginWindowMs ?? 60_000;
   const app = express();
   app.use(cors());
   app.use(express.json());
@@ -23,13 +26,23 @@ export async function createApp(options = {}) {
 
   app.post("/api/login", (req, res) => {
     const { nric, password, role } = req.body ?? {};
+    const attemptKey = `${req.ip}:${nric ?? "unknown"}`;
+    const now = Date.now();
+    const attempts = failedLogins.get(attemptKey)?.filter((attempt) => now - attempt < loginWindowMs) ?? [];
+    if (attempts.length >= maxFailedLogins) {
+      const retryAfterSeconds = Math.max(1, Math.ceil((loginWindowMs - (now - attempts[0])) / 1000));
+      res.set("Retry-After", String(retryAfterSeconds));
+      return res.status(429).json({ error: `Too many sign-in attempts. Try again in ${retryAfterSeconds} seconds.` });
+    }
     const user = db.data.users.find(
       (candidate) => candidate.nric === nric && candidate.role === role,
     );
     if (!user || !passwordMatches(password, user.passwordHash)) {
+      failedLogins.set(attemptKey, [...attempts, now]);
       return res.status(401).json({ error: "Invalid NRIC, password, or sign-in mode." });
     }
 
+    failedLogins.delete(attemptKey);
     const token = crypto.randomUUID();
     sessions.set(token, { nric: user.nric, role: user.role });
     return res.json({ token, user: { nric: user.nric, name: user.name, role: user.role } });
