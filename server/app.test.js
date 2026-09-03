@@ -42,4 +42,33 @@ describe("CivicVoice baseline API", () => {
     const response = await request(app).get("/api/feedback");
     expect(response.status).toBe(403);
   });
+
+  it("does not trust a forged admin role header", async () => {
+    const app = await testApp();
+    const response = await request(app).get("/api/feedback").set("x-user-role", "admin");
+    expect(response.status).toBe(403);
+  });
+
+  it("allows the inbox only with an opaque admin session token", async () => {
+    const app = await testApp();
+    const login = await request(app).post("/api/login").send({
+      nric: "S0000002B", password: "admin123", role: "admin",
+    });
+    const response = await request(app)
+      .get("/api/feedback")
+      .set("authorization", `Bearer ${login.body.token}`);
+    expect(login.body.token).not.toContain("S0000002B");
+    expect(response.status).toBe(200);
+  });
+
+  it("does not allow a citizen session to access the inbox", async () => {
+    const app = await testApp();
+    const login = await request(app).post("/api/login").send({
+      nric: "S0000001A", password: "citizen123", role: "citizen",
+    });
+    const response = await request(app)
+      .get("/api/feedback")
+      .set("authorization", `Bearer ${login.body.token}`);
+    expect(response.status).toBe(403);
+  });
 });
