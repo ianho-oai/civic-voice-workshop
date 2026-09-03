@@ -47,6 +47,10 @@ textarea { resize: vertical; line-height: 1.6; }
 .form-footer { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-top: 20px; font-size: 13px; }
 .success-banner { background: #e8f4ec; color: #26703b; border-radius: 8px; padding: 13px 15px; margin-bottom: 20px; font-size: 18px; }
 .admin-shell { max-width: 1050px; }
+.inbox-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.summary-card { display: grid; gap: 5px; padding: 20px; border: 1px solid #e2dfd7; border-radius: 12px; background: white; }
+.summary-label { color: #69747b; font-size: 14px; }
+.summary-card strong { font-family: Fraunces, Georgia, serif; font-size: 30px; line-height: 1; }
 .list-header { display: flex; justify-content: space-between; padding-bottom: 18px; border-bottom: 1px solid #eceae4; }
 .list-header span { color: #69747b; font-size: 14px; }
 .feedback-row { display: flex; justify-content: space-between; gap: 24px; padding: 20px 0; border-bottom: 1px solid #eceae4; }
@@ -61,6 +65,7 @@ textarea { resize: vertical; line-height: 1.6; }
   .login-panel { padding: 46px 24px; }
   .site-header { padding: 0 20px; }
   .signed-in { display: none; }
+  .inbox-summary { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .form-footer { align-items: stretch; flex-direction: column; }
   .form-footer .primary-button { width: 100%; }
 }
