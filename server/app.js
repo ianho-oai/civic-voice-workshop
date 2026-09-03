@@ -72,8 +72,11 @@ export async function createApp(options = {}) {
     if (!feedbackCategories.includes(category)) {
       return res.status(400).json({ error: "Please select a valid feedback category." });
     }
+    const id = crypto.randomUUID();
     const feedback = {
-      id: crypto.randomUUID(), nric, name, message, category, status: "New",
+      id,
+      reference: `CV-${id.replaceAll("-", "").slice(0, 6).toUpperCase()}`,
+      nric, name, message, category, status: "New",
       createdAt: new Date().toISOString(),
     };
     db.data.feedback.unshift(feedback);

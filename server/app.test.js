@@ -67,6 +67,8 @@ describe("CivicVoice baseline API", () => {
     expect(response.status).toBe(201);
     expect(response.body.feedback.message).toBe("Please add more benches.");
     expect(response.body.feedback.category).toBe("Environment");
+    expect(response.body.feedback.reference).toMatch(/^CV-[A-F0-9]{6}$/);
+    expect(response.body.feedback.reference).not.toBe(response.body.feedback.id);
 
     const adminLogin = await request(app).post("/api/login").send({
       nric: "S0000002B", password: "admin123", role: "admin",
