@@ -3,6 +3,13 @@ import express from "express";
 import cors from "cors";
 import { createDb } from "./lib/db.js";
 
+function passwordMatches(password, passwordHash) {
+  if (typeof password !== "string" || typeof passwordHash !== "string") return false;
+  const derivedHash = crypto.scryptSync(password, "civic-voice-demo-password-salt", 64);
+  const storedHash = Buffer.from(passwordHash, "hex");
+  return storedHash.length === derivedHash.length && crypto.timingSafeEqual(storedHash, derivedHash);
+}
+
 export async function createApp(options = {}) {
   const db = options.db ?? (await createDb());
   const sessions = new Map();
@@ -17,9 +24,11 @@ export async function createApp(options = {}) {
   app.post("/api/login", (req, res) => {
     const { nric, password, role } = req.body ?? {};
     const user = db.data.users.find(
-      (candidate) => candidate.nric === nric && candidate.password === password && candidate.role === role,
+      (candidate) => candidate.nric === nric && candidate.role === role,
     );
-    if (!user) return res.status(401).json({ error: "Invalid NRIC, password, or sign-in mode." });
+    if (!user || !passwordMatches(password, user.passwordHash)) {
+      return res.status(401).json({ error: "Invalid NRIC, password, or sign-in mode." });
+    }
 
     const token = crypto.randomUUID();
     sessions.set(token, { nric: user.nric, role: user.role });

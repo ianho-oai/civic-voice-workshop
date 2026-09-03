@@ -1,7 +1,13 @@
+import crypto from "node:crypto";
+
+function hashDemoPassword(password) {
+  return crypto.scryptSync(password, "civic-voice-demo-password-salt", 64).toString("hex");
+}
+
 export const seedData = {
   users: [
-    { nric: "S0000001A", password: "citizen123", name: "Aisha Rahman", role: "citizen" },
-    { nric: "S0000002B", password: "admin123", name: "Daniel Tan", role: "admin" },
+    { nric: "S0000001A", passwordHash: hashDemoPassword("citizen123"), name: "Aisha Rahman", role: "citizen" },
+    { nric: "S0000002B", passwordHash: hashDemoPassword("admin123"), name: "Daniel Tan", role: "admin" },
   ],
   feedback: [
     {
