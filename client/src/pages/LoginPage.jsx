@@ -10,10 +10,17 @@ export function LoginPage({ onLogin }) {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    setBusy(true);
     setError("");
+    const normalizedNric = nric.trim().toUpperCase();
+
+    if (!/^[STFG]\d{7}[A-Z]$/.test(normalizedNric)) {
+      setError("Enter a valid NRIC-like ID, for example S0000001A.");
+      return;
+    }
+
+    setBusy(true);
     try {
-      const session = await login({ nric, password, role });
+      const session = await login({ nric: normalizedNric, password, role });
       onLogin(session);
     } catch (requestError) {
       setError(requestError.message);
