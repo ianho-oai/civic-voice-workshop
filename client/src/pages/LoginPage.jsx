@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { login } from "../api";
+import { normalizeNric, validateNric } from "../nric";
 
 export function LoginPage({ onLogin }) {
   const [role, setRole] = useState("citizen");
@@ -10,10 +11,16 @@ export function LoginPage({ onLogin }) {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    setBusy(true);
     setError("");
+    const nricError = validateNric(nric);
+    if (nricError) {
+      setError(nricError);
+      return;
+    }
+
+    setBusy(true);
     try {
-      const session = await login({ nric, password, role });
+      const session = await login({ nric: normalizeNric(nric), password, role });
       onLogin(session);
     } catch (requestError) {
       setError(requestError.message);
