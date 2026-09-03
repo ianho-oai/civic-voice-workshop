@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { getFeedback } from "../api";
 
+function maskNric(nric) {
+  if (!nric) return "";
+  return `${nric.slice(0, 1)}${"•".repeat(Math.max(0, nric.length - 3))}${nric.slice(-2)}`;
+}
+
 export function AdminPage({ user }) {
   const [feedback, setFeedback] = useState([]);
   const [search, setSearch] = useState("");
@@ -66,6 +71,7 @@ export function AdminPage({ user }) {
         {visibleFeedback.map((item) => (
           <article className="feedback-row" key={item.id}>
             <div>
+              <div className="feedback-meta">Resident ID: {maskNric(item.nric)}</div>
               <div className="feedback-meta">{item.name} · {new Date(item.createdAt).toLocaleDateString()}</div>
               <p>{item.message}</p>
             </div>
