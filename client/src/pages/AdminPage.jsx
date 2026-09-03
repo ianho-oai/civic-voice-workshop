@@ -25,7 +25,10 @@ export function AdminPage({ session }) {
               <div className="feedback-meta">{item.name} · {new Date(item.createdAt).toLocaleDateString()}</div>
               <p>{item.message}</p>
             </div>
-            <span className="status-pill">{item.status}</span>
+            <div className="feedback-tags">
+              <span className="category-pill">{item.category}</span>
+              <span className="status-pill">{item.status}</span>
+            </div>
           </article>
         ))}
       </section>
