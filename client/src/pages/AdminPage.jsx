@@ -3,6 +3,7 @@ import { getFeedback } from "../api";
 
 export function AdminPage({ user }) {
   const [feedback, setFeedback] = useState([]);
+  const [search, setSearch] = useState("");
   const [error, setError] = useState("");
 
   const summary = feedback.reduce((counts, item) => {
@@ -13,6 +14,13 @@ export function AdminPage({ user }) {
     if (status === "closed") counts.closed += 1;
     return counts;
   }, { total: 0, new: 0, inReview: 0, closed: 0 });
+
+  const searchTerm = search.trim().toLowerCase();
+  const visibleFeedback = feedback.filter((item) => (
+    !searchTerm
+    || item.name.toLowerCase().includes(searchTerm)
+    || item.message.toLowerCase().includes(searchTerm)
+  ));
 
   useEffect(() => {
     getFeedback(user).then((response) => setFeedback(response.feedback)).catch((requestError) => setError(requestError.message));
@@ -45,8 +53,17 @@ export function AdminPage({ user }) {
         </article>
       </section>
       <section className="feedback-list">
-        <div className="list-header"><strong>Latest feedback</strong><span>{feedback.length} items</span></div>
-        {feedback.map((item) => (
+        <label>
+          Search feedback
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search messages or residents"
+          />
+        </label>
+        <div className="list-header"><strong>Latest feedback</strong><span>{visibleFeedback.length} items</span></div>
+        {visibleFeedback.map((item) => (
           <article className="feedback-row" key={item.id}>
             <div>
               <div className="feedback-meta">{item.name} · {new Date(item.createdAt).toLocaleDateString()}</div>
@@ -55,6 +72,7 @@ export function AdminPage({ user }) {
             <span className="status-pill">{item.status}</span>
           </article>
         ))}
+        {searchTerm && visibleFeedback.length === 0 && <p className="muted">No feedback matches “{search.trim()}”.</p>}
       </section>
     </main>
   );
