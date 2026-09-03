@@ -3,6 +3,7 @@ import { submitFeedback } from "../api";
 import { hasFeedbackContent } from "../feedback";
 
 export function CitizenPage({ user }) {
+  const maximumMessageLength = 500;
   const [message, setMessage] = useState("");
   const [category, setCategory] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -36,8 +37,9 @@ export function CitizenPage({ user }) {
         {submitted && <div className="success-banner">Thank you. Your feedback has been received.</div>}
         <form onSubmit={handleSubmit}>
           <label>Your feedback
-            <textarea rows="7" value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Share your feedback here..." />
+            <textarea rows="7" value={message} maxLength={maximumMessageLength} onChange={(event) => setMessage(event.target.value)} placeholder="Share your feedback here..." />
           </label>
+          <p className="muted" aria-live="polite">{message.length} / {maximumMessageLength} characters</p>
           <label htmlFor="feedback-category">Category
             <select id="feedback-category" value={category} onChange={(event) => setCategory(event.target.value)} required>
               <option value="" disabled>Choose a category</option>
