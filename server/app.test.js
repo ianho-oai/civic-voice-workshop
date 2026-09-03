@@ -59,13 +59,33 @@ describe("CivicVoice baseline API", () => {
     expect(response.status).toBe(200);
   });
 
-  it("accepts feedback", async () => {
+  it("stores a valid feedback category", async () => {
     const app = await testApp();
     const response = await request(app).post("/api/feedback").send({
-      nric: "S0000001A", name: "Aisha Rahman", message: "Please add more benches.",
+      nric: "S0000001A", name: "Aisha Rahman", message: "Please add more benches.", category: "Environment",
     });
     expect(response.status).toBe(201);
     expect(response.body.feedback.message).toBe("Please add more benches.");
+    expect(response.body.feedback.category).toBe("Environment");
+
+    const adminLogin = await request(app).post("/api/login").send({
+      nric: "S0000002B", password: "admin123", role: "admin",
+    });
+    const inbox = await request(app)
+      .get("/api/feedback")
+      .set("authorization", `Bearer ${adminLogin.body.token}`);
+    expect(inbox.body.feedback[0].category).toBe("Environment");
+  });
+
+  it("rejects feedback with a missing or unsupported category", async () => {
+    const app = await testApp();
+    const baseFeedback = { nric: "S0000001A", name: "Aisha Rahman", message: "Please add more benches." };
+
+    const missingCategory = await request(app).post("/api/feedback").send(baseFeedback);
+    const unsupportedCategory = await request(app).post("/api/feedback").send({ ...baseFeedback, category: "General" });
+
+    expect(missingCategory.status).toBe(400);
+    expect(unsupportedCategory.status).toBe(400);
   });
 
   it("rejects blank or whitespace-only feedback", async () => {
