@@ -61,7 +61,10 @@ export async function createApp(options = {}) {
   }
 
   app.get("/api/feedback", requireAdmin, (_req, res) => {
-    return res.json({ feedback: db.data.feedback });
+    const feedback = [...db.data.feedback].sort(
+      (first, second) => new Date(second.createdAt) - new Date(first.createdAt),
+    );
+    return res.json({ feedback });
   });
 
   app.post("/api/feedback", async (req, res) => {

@@ -77,6 +77,28 @@ describe("CivicVoice baseline API", () => {
     expect(inbox.body.feedback[0].category).toBe("Environment");
   });
 
+  it("returns feedback newest first when stored data is out of order", async () => {
+    const directory = await mkdtemp(path.join(os.tmpdir(), "civic-voice-"));
+    const db = await createDb(path.join(directory, "db.json"));
+    db.data.feedback = [
+      { id: "old", name: "Aisha Rahman", message: "Older feedback", category: "Estate", status: "New", createdAt: "2026-08-01T09:00:00.000Z" },
+      { id: "new", name: "Aisha Rahman", message: "Newer feedback", category: "Transport", status: "New", createdAt: "2026-08-30T09:00:00.000Z" },
+      { id: "middle", name: "Aisha Rahman", message: "Middle feedback", category: "Other", status: "New", createdAt: "2026-08-15T09:00:00.000Z" },
+    ];
+    await db.write();
+    const app = await createApp({ db });
+    const login = await request(app).post("/api/login").send({
+      nric: "S0000002B", password: "admin123", role: "admin",
+    });
+
+    const response = await request(app)
+      .get("/api/feedback")
+      .set("authorization", `Bearer ${login.body.token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.feedback.map((item) => item.id)).toEqual(["new", "middle", "old"]);
+  });
+
   it("rejects feedback with a missing or unsupported category", async () => {
     const app = await testApp();
     const baseFeedback = { nric: "S0000001A", name: "Aisha Rahman", message: "Please add more benches." };
