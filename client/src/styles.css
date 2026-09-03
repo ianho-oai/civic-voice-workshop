@@ -29,6 +29,7 @@ h1, h2 { font-family: Fraunces, Georgia, serif; letter-spacing: -.04em; }
 label { display: grid; gap: 8px; margin: 15px 0; color: #38434a; font-size: 14px; font-weight: 600; }
 input, textarea { width: 100%; border: 1px solid #d5d2cb; border-radius: 8px; background: white; padding: 13px 14px; outline: none; }
 input:focus, textarea:focus { border-color: #b2252a; box-shadow: 0 0 0 3px rgba(178,37,42,.1); }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, [tabindex="-1"]:focus { outline: 3px solid #1d6f8a; outline-offset: 3px; }
 textarea { resize: vertical; line-height: 1.6; }
 .primary-button { border: 0; background: #b2252a; color: white; border-radius: 8px; padding: 13px 18px; font-weight: 700; min-width: 145px; }
 .primary-button:hover { background: #8f1b20; }
@@ -44,7 +45,7 @@ textarea { resize: vertical; line-height: 1.6; }
 .page-heading p { color: #69747b; line-height: 1.6; }
 .form-card, .feedback-list { background: white; border: 1px solid #e2dfd7; border-radius: 14px; padding: 28px; box-shadow: 0 8px 30px rgba(28,36,42,.04); }
 .form-footer { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-top: 20px; font-size: 13px; }
-.success-banner { background: #e8f4ec; color: #26703b; border-radius: 8px; padding: 13px 15px; margin-bottom: 20px; font-size: 14px; }
+.success-banner { background: #e8f4ec; color: #26703b; border-radius: 8px; padding: 13px 15px; margin-bottom: 20px; font-size: 18px; }
 .admin-shell { max-width: 1050px; }
 .list-header { display: flex; justify-content: space-between; padding-bottom: 18px; border-bottom: 1px solid #eceae4; }
 .list-header span { color: #69747b; font-size: 14px; }
